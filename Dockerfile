@@ -10,22 +10,18 @@ RUN apt-get update && \
 
 ENV DOCKERIZE_VERSION v0.2.0
 
-ADD rabbitmq.config /etc/rabbitmq/rabbitmq.config
-ADD erlang.cookie /var/lib/rabbitmq/.erlang.cookie
-
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
-RUN chmod u+rw /etc/rabbitmq/rabbitmq.config && \
-	chown rabbitmq:rabbitmq /var/lib/rabbitmq/.erlang.cookie && \
-	chmod 400 /var/lib/rabbitmq/.erlang.cookie && \
-	mkdir /opt/rabbit 
-
+RUN mkdir /opt/rabbit 
 ADD run.sh /opt/rabbit/
 
 RUN chmod a+x /opt/rabbit/run.sh
 
-ENV RABBITMQ_LOGS=- RABBITMQ_SASL_LOGS=-
+ENV RABBITMQ_LOGS=- 
+ENV RABBITMQ_SASL_LOGS=-
+ENV RABBITMQ_CONFIG="[{rabbit, [{loopback_users, []}]}]."
+ENV ERLANG_COOKIE=RABBITMQ
 
 EXPOSE 5672
 EXPOSE 15672
