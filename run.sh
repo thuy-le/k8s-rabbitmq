@@ -1,6 +1,7 @@
 #!/bin/bash
 
 function join_cluster {
+	dockerize -wait tcp://$CLUSTER_WITH:4369 -timeout 250s
 	dockerize -wait tcp://$CLUSTER_WITH:25672 -timeout 250s
 	rabbitmqctl stop_app
 	if [ -z "$RAM_NODE" ]; then
