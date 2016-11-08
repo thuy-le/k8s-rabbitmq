@@ -2,6 +2,23 @@
 
 set -e
 
+function is_cluster_part {
+
+	CLUSTER_CONFIG_FILE="/var/lib/rabbitmq/mnesia/rabbit@$(hostname)/cluster_nodes.config"
+	if [ ! -f $CLUSTER_CONFIG_FILE ]; then
+		echo "false"
+		exit 0
+	fi
+
+	NUMBER=`cat "$CLUSTER_CONFIG_FILE" | grep "rabbit@$(hostname)" | wc -l`
+
+	if [[ "$NUMBER" != 0 ]]; then
+		echo "true"
+	else
+		echo "false"
+	fi
+}
+
 function join_cluster {
 	dockerize -wait tcp://$CLUSTER_WITH:4369 -timeout 250s
 	dockerize -wait tcp://$CLUSTER_WITH:25672 -timeout 250s
@@ -28,9 +45,16 @@ chmod 400 /var/lib/rabbitmq/.erlang.cookie
 if [ -z "$CLUSTER_WITH" ]; then
 	echo 'Starting non-clustered node...'
 else
-	echo "Starting clustered node ($CLUSTER_WITH)..."
-	sleep 10
-	join_cluster &
+	CLUSTERED=$(is_cluster_part)
+
+	if [[ "$CLUSTERED" == "true" ]]; then
+	    echo "Node has been added to the cluster - no need to join it again!"
+	else
+		echo "Starting clustered node ($CLUSTER_WITH)..."
+		sleep 10
+		join_cluster &
+	fi
+
 fi
 
 

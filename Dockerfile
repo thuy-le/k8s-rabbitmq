@@ -23,6 +23,8 @@ ENV RABBITMQ_SASL_LOGS=-
 ENV RABBITMQ_CONFIG="[{rabbit, [{loopback_users, []}]}]."
 ENV ERLANG_COOKIE=RABBITMQ
 
+VOLUME /var/lib/rabbitmq/mnesia
+
 EXPOSE 5672
 EXPOSE 15672
 EXPOSE 25672
