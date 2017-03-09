@@ -22,6 +22,7 @@ ENV RABBITMQ_LOGS=-
 ENV RABBITMQ_SASL_LOGS=-
 ENV RABBITMQ_CONFIG="[{rabbit, [{loopback_users, []}]}]."
 ENV ERLANG_COOKIE=RABBITMQ
+ENV WAIT_CLUSTERED_WITH="250s"
 
 VOLUME /var/lib/rabbitmq/mnesia
 

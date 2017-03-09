@@ -4,13 +4,13 @@ set -e
 
 function is_cluster_part {
 
-	CLUSTER_CONFIG_FILE="/var/lib/rabbitmq/mnesia/rabbit@$(hostname)/cluster_nodes.config"
+	CLUSTER_CONFIG_FILE="/var/lib/rabbitmq/mnesia/$RABBITMQ_NODENAME/cluster_nodes.config"
 	if [ ! -f $CLUSTER_CONFIG_FILE ]; then
 		echo "false"
 		exit 0
 	fi
 
-	NUMBER=`cat "$CLUSTER_CONFIG_FILE" | grep "rabbit@$(hostname)" | wc -l`
+	NUMBER=`cat "$CLUSTER_CONFIG_FILE" | grep "$RABBITMQ_NODENAME" | wc -l`
 
 	if [[ "$NUMBER" != 0 ]]; then
 		echo "true"
@@ -20,8 +20,6 @@ function is_cluster_part {
 }
 
 function join_cluster {
-	dockerize -wait tcp://$CLUSTER_WITH:4369 -timeout 250s
-	dockerize -wait tcp://$CLUSTER_WITH:25672 -timeout 250s
 	rabbitmqctl stop_app
 	if [ -z "$RAM_NODE" ]; then
 		rabbitmqctl join_cluster rabbit@$CLUSTER_WITH
@@ -30,6 +28,11 @@ function join_cluster {
 	fi
 	rabbitmqctl start_app
 }
+
+if [ -z "$RABBITMQ_NODENAME" ]; then
+	export RABBITMQ_NODENAME="rabbit@$(hostname)"
+fi
+echo " > RABBITMQ_NODENAME=$RABBITMQ_NODENAME"
 
 # Make sure folder is owned by correct user
 chown -R rabbitmq:rabbitmq /var/lib/rabbitmq/
@@ -52,6 +55,8 @@ else
 	else
 		echo "Starting clustered node ($CLUSTER_WITH)..."
 		sleep 10
+		dockerize -wait tcp://$CLUSTER_WITH:4369 -timeout "$WAIT_CLUSTERED_WITH"
+		dockerize -wait tcp://$CLUSTER_WITH:25672 -timeout "$WAIT_CLUSTERED_WITH"
 		join_cluster &
 	fi
 

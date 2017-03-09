@@ -1,33 +1,56 @@
-rabbit1:
-#  image: relaxart/rabbitmq-server
-  build: ./
-  hostname: rabbit1
-  ports:
-    - "5672:5672"
-    - "15672:15672"
+version: '2'
 
-rabbit2:
-#  image: relaxart/rabbitmq-server
-  build: ./
-  hostname: rabbit2
-  links:
-    - rabbit1
-  environment: 
-   - CLUSTER_WITH=rabbit1
-   - RAM_NODE=true
-  ports:
-      - "5673:5672"
-      - "15673:15672"
+networks:
+  rabbit:
+    driver: bridge
 
-rabbit3:
-#  image: relaxart/rabbitmq-server
-  build: ./
-  hostname: rabbit3
-  links:
-    - rabbit1
-    - rabbit2
-  environment: 
-   - CLUSTER_WITH=rabbit1   
-  ports:
-        - "5674:5672"
-        - "15674:15672"
+services:
+  rabbit1:
+#    image: relaxart/rabbitmq-server
+    build: ./
+    hostname: rabbit1-0
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+     - RABBITMQ_NODENAME=rabbit@rabbit1
+    networks:
+      rabbit:
+        aliases:
+          - rabbit1
+
+  rabbit2:
+#    image: relaxart/rabbitmq-server
+    build: ./
+    hostname: rabbit2-0
+    links:
+      - rabbit1
+    environment:
+     - RABBITMQ_NODENAME=rabbit@rabbit2
+     - CLUSTER_WITH=rabbit1
+     - RAM_NODE=true
+    ports:
+        - "5673:5672"
+        - "15673:15672"
+    networks:
+      rabbit:
+        aliases:
+          - rabbit2
+
+  rabbit3:
+#    image: relaxart/rabbitmq-server
+    build: ./
+    hostname: rabbit3-0
+    links:
+      - rabbit1
+      - rabbit2
+    environment: 
+     - RABBITMQ_NODENAME=rabbit@rabbit3
+     - CLUSTER_WITH=rabbit1   
+    ports:
+          - "5674:5672"
+          - "15674:15672"
+    networks:
+      rabbit:
+        aliases:
+          - rabbit3
