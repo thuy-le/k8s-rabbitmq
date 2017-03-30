@@ -34,7 +34,7 @@ if [ -z "$RABBITMQ_NODENAME" ]; then
 fi
 echo " > RABBITMQ_NODENAME=$RABBITMQ_NODENAME"
 HOST=`echo $RABBITMQ_NODENAME | awk -F @ '{print $2}'`
-echo "$HOST 127.0.0.1" >> /etc/hosts # Resolve it without external connection
+echo "127.0.0.1 $HOST" >> /etc/hosts # Resolve it without external connection
 
 # Make sure folder is owned by correct user
 chown -R rabbitmq:rabbitmq /var/lib/rabbitmq/
