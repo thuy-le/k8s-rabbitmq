@@ -6,7 +6,9 @@ RUN apt-get update && \
 	wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | apt-key add - && \
 	apt-get update && \ 
 	apt-get install -y rabbitmq-server && \
-	/usr/sbin/rabbitmq-plugins enable --offline rabbitmq_management rabbitmq_management_agent rabbitmq_management_visualiser rabbitmq_federation rabbitmq_federation_management 
+	wget https://dl.bintray.com/rabbitmq/community-plugins/rabbitmq_delayed_message_exchange-0.0.1.ez\
+    -P /usr/lib/rabbitmq/plugins/ && \
+	/usr/sbin/rabbitmq-plugins enable --offline rabbitmq_management rabbitmq_management_agent rabbitmq_management_visualiser rabbitmq_federation rabbitmq_federation_management rabbitmq_delayed_message_exchange
 
 ENV DOCKERIZE_VERSION v0.2.0
 
